@@ -27,6 +27,16 @@ trait HandlesRouteDiscovery
     protected static $routeMiddleware = [];
     protected static $withoutRouteMiddleware = [];
 
+    /**
+     * Determine whether route auto discovery is enabled.
+     *
+     * @return bool
+     */
+    public function routeDiscoveryEnabled(): bool
+    {
+        return !property_exists($this, 'routeDiscoveryDisabled');
+    }
+
     public static function registerRoutes(): void
     {
         if (static::isRelationController()) {
@@ -59,7 +69,7 @@ trait HandlesRouteDiscovery
         $controller = static::class;
         $instance = app($controller);
 
-        $model = isset($instance->model) ? $instance->model : null;
+        $model = $instance->model ?? null;
         $relation = isset($instance->relation) ? $instance->relation : null;
         $type = isset($instance->resourceType) ? $instance->resourceType : static::detectRelationType($model, $relation);
 
@@ -74,7 +84,6 @@ trait HandlesRouteDiscovery
             ->prefix(static::getRoutePrefix())
             ->name(static::getRouteNamePrefix() . '.')
             ->group(function () use ($type, $parentSlug, $relation, $controller, $instance) {
-                $route = null;
 
                 switch ($type) {
                     case 'hasOne':

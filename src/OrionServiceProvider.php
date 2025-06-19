@@ -4,6 +4,7 @@ namespace Orion;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Orion\Commands\BuildSpecsCommand;
 use Orion\Contracts\ComponentsResolver;
 use Orion\Contracts\KeyResolver;
@@ -12,6 +13,8 @@ use Orion\Contracts\ParamsValidator;
 use Orion\Contracts\QueryBuilder;
 use Orion\Contracts\RelationsResolver;
 use Orion\Contracts\SearchBuilder;
+use Orion\Http\Controllers\Controller;
+use Orion\Http\Controllers\RelationController;
 use Orion\Http\Middleware\EnforceExpectsJson;
 use Orion\Specs\ResourcesCacheStore;
 
@@ -70,28 +73,46 @@ class OrionServiceProvider extends ServiceProvider
     protected function discoverAndRegisterControllers(): void
     {
         $paths = config('orion.route_discovery.paths', []);
-        $baseNamespace = trim(config('orion.namespaces.controllers', 'App\\Http\\Controllers\\'), '\\');
 
         foreach ($paths as $path) {
             if (! is_dir($path)) {
                 continue;
             }
 
-            foreach (File::allFiles($path) as $file) {
-                $relativePath = str($file->getRelativePathname())
-                    ->replace(DIRECTORY_SEPARATOR, '\\')
-                    ->replace('.php', '')
-                    ->value();
+            $namespace = $this->pathToNamespace($path);
 
-                $class = "$baseNamespace\\$relativePath";
+            foreach (File::allFiles($path) as $file) {
+                $class = $namespace . '\\' . str_replace(
+                        ['/', '.php'],
+                        ['\\', ''],
+                        $file->getRelativePathname()
+                    );
 
                 if (
                     class_exists($class) &&
-                    method_exists($class, 'registerRoutes')
+                    (
+                        is_subclass_of($class, Controller::class) ||
+                        is_subclass_of($class, RelationController::class)
+                    )
                 ) {
+                    $instance = app($class);
+
+                    if (method_exists($instance, 'routeDiscoveryEnabled') && !$instance->routeDiscoveryEnabled()) {
+                        continue;
+                    }
+
                     $class::registerRoutes();
                 }
             }
         }
+    }
+
+    protected function pathToNamespace(string $path): string
+    {
+        return Str::of($path)
+            ->after(base_path('app'))
+            ->replace('/', '\\')
+            ->prepend('App')
+            ->__toString();
     }
 }
