@@ -2,6 +2,7 @@
 
 namespace Orion;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Orion\Commands\BuildSpecsCommand;
 use Orion\Contracts\ComponentsResolver;
@@ -59,6 +60,38 @@ class OrionServiceProvider extends ServiceProvider
                     BuildSpecsCommand::class,
                 ]
             );
+        }
+
+        if (config('orion.route_discovery.enabled', false)) {
+            $this->discoverAndRegisterControllers();
+        }
+    }
+
+    protected function discoverAndRegisterControllers(): void
+    {
+        $paths = config('orion.route_discovery.paths', []);
+        $baseNamespace = trim(config('orion.namespaces.controllers', 'App\\Http\\Controllers\\'), '\\');
+
+        foreach ($paths as $path) {
+            if (! is_dir($path)) {
+                continue;
+            }
+
+            foreach (File::allFiles($path) as $file) {
+                $relativePath = str($file->getRelativePathname())
+                    ->replace(DIRECTORY_SEPARATOR, '\\')
+                    ->replace('.php', '')
+                    ->value();
+
+                $class = "$baseNamespace\\$relativePath";
+
+                if (
+                    class_exists($class) &&
+                    method_exists($class, 'registerRoutes')
+                ) {
+                    $class::registerRoutes();
+                }
+            }
         }
     }
 }
