@@ -51,4 +51,16 @@ return [
     ],
 
     'use_validated' => false,
+
+    'route_discovery' => [
+        'enabled' => true,
+        'paths' => [
+            app_path('Http/Controllers/Api'),
+        ],
+        'route_prefix' => 'api',
+        'route_name_prefix' => 'api',
+        'route_middleware' => [
+            // Add custom middleware here - eg: 'auth:sanctum',
+        ],
+    ],
 ];

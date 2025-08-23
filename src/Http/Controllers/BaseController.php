@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Orion\Concerns\BuildsResponses;
 use Orion\Concerns\HandlesAuthorization;
+use Orion\Concerns\HandlesRouteDiscovery;
 use Orion\Concerns\HandlesTransactions;
 use Orion\Concerns\InteractsWithBatchResources;
 use Orion\Concerns\InteractsWithHooks;
@@ -39,6 +40,7 @@ abstract class BaseController extends \Illuminate\Routing\Controller
         InteractsWithSoftDeletes,
         InteractsWithBatchResources,
         BuildsResponses,
+        HandlesRouteDiscovery,
         HandlesTransactions;
 
     /**
