@@ -58,7 +58,10 @@
         }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "kylekatarnls/update-helper": true
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true
