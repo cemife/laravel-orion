@@ -98,7 +98,7 @@ class QueryBuilder implements \Orion\Contracts\QueryBuilder
     public function applyScopesToQuery($query, Request $request): void
     {
         $this->paramsValidator->validateScopes($request);
-        $scopeDescriptors = $request->get('scopes', []);
+        $scopeDescriptors = $request->input('scopes', []);
 
         foreach ($scopeDescriptors as $scopeDescriptor) {
             $query->{$scopeDescriptor['name']}(...Arr::get($scopeDescriptor, 'parameters', []));
@@ -118,7 +118,7 @@ class QueryBuilder implements \Orion\Contracts\QueryBuilder
         if (!$filterDescriptors && !$this->intermediateMode) {
             $this->paramsValidator->validateFilters($request);
 
-            $filterDescriptors = $request->get('filters', []);
+            $filterDescriptors = $request->input('filters', []);
         }
 
         foreach ($filterDescriptors as $filterDescriptor) {
@@ -381,7 +381,7 @@ class QueryBuilder implements \Orion\Contracts\QueryBuilder
      */
     public function applySearchingToQuery($query, Request $request): void
     {
-        if (!$requestedSearchDescriptor = $request->get('search')) {
+        if (!$requestedSearchDescriptor = $request->input('search')) {
             return;
         }
 
@@ -461,7 +461,7 @@ class QueryBuilder implements \Orion\Contracts\QueryBuilder
     public function applySortingToQuery($query, Request $request): void
     {
         $this->paramsValidator->validateSort($request);
-        $sortableDescriptors = $request->get('sort', []);
+        $sortableDescriptors = $request->input('sort', []);
 
         foreach ($sortableDescriptors as $sortable) {
             $sortableField = $sortable['field'];
@@ -561,7 +561,7 @@ class QueryBuilder implements \Orion\Contracts\QueryBuilder
                 );
             }
 
-            $aggregateDescriptors = $aggregateDescriptors->merge($request->get('aggregates', []));
+            $aggregateDescriptors = $aggregateDescriptors->merge($request->input('aggregates', []));
         }
 
         foreach ($aggregateDescriptors as $aggregateDescriptor) {
@@ -618,7 +618,7 @@ class QueryBuilder implements \Orion\Contracts\QueryBuilder
         if (!$includeDescriptors) {
             $this->paramsValidator->validateIncludes($request);
 
-            $requestedIncludeDescriptors = collect($request->get('includes', []));
+            $requestedIncludeDescriptors = collect($request->input('includes', []));
 
             $includeDescriptors = collect($this->relationsResolver->requestedRelations($request))
                 ->map(function ($include) use ($requestedIncludeDescriptors) {

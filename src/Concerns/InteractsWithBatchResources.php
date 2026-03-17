@@ -12,7 +12,7 @@ trait InteractsWithBatchResources
      */
     protected function resolveResourceKeys(Request $request): array
     {
-        $resources = $request->get('resources', []);
+        $resources = $request->input('resources', []);
         if (array_keys($resources) !== range(0, count($resources) - 1)) {
             return array_keys($resources);
         }

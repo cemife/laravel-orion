@@ -153,7 +153,7 @@ trait HandlesRelationStandardOperations
      */
     protected function buildIndexFetchQuery(Request $request, Model $parentEntity, array $requestedRelations): Relation
     {
-        $filters = collect($request->get('filters', []))
+        $filters = collect($request->input('filters', []))
             ->map(function (array $filterDescriptor) use ($request, $parentEntity) {
                 return $this->beforeFilterApplied($request, $parentEntity, $filterDescriptor);
             })->toArray();
@@ -320,7 +320,7 @@ trait HandlesRelationStandardOperations
             $parentEntity,
             $entity,
             $this->retrieve($request),
-            $request->get('pivot', [])
+            $request->input('pivot', [])
         );
 
         $query = $this->buildStoreFetchQuery($request, $parentEntity, $requestedRelations);
@@ -732,7 +732,7 @@ trait HandlesRelationStandardOperations
             $parentEntity,
             $entity,
             $this->retrieve($request),
-            $request->get('pivot', [])
+            $request->input('pivot', [])
         );
 
         $entity = $this->refreshUpdatedEntity(

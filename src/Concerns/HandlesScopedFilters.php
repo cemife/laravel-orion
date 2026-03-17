@@ -22,7 +22,7 @@ trait HandlesScopedFilters
      */
     public function resolveScopedFilters($query, Request $request, array $mappingCallbacks): array
     {
-        $requestedFilters = $request->get('filters', []);
+        $requestedFilters = $request->input('filters', []);
 
         $filters = $this->getScopedFilterDescriptors(collect($requestedFilters));
 

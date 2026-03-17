@@ -44,7 +44,7 @@ class RelationsResolver implements \Orion\Contracts\RelationsResolver
     public function requestedRelations(Request $request): array
     {
         $requestedIncludesQuery = collect(explode(',', $request->query('include', '')));
-        $requestedIncludesBody = collect($request->get('includes', []))->pluck('relation');
+        $requestedIncludesBody = collect($request->input('includes', []))->pluck('relation');
 
         $requestedIncludes = $requestedIncludesQuery
             ->merge($requestedIncludesBody)
