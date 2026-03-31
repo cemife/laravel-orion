@@ -46,7 +46,7 @@ trait HandlesRelationOneToManyOperations
         $requestedRelations = $this->relationsResolver->requestedRelations($request);
 
         $query = $this->buildAssociateFetchQuery($request, $parentEntity, $requestedRelations);
-        $entity = $this->runAssociateFetchQuery($request, $query, $parentEntity, $request->get('related_key'));
+        $entity = $this->runAssociateFetchQuery($request, $query, $parentEntity, $request->input('related_key'));
 
         $beforeHookResult = $this->beforeAssociate($request, $parentEntity, $entity);
         if ($this->hookResponds($beforeHookResult)) {
@@ -58,7 +58,7 @@ trait HandlesRelationOneToManyOperations
 
         $this->performAssociate($request, $parentEntity, $entity);
 
-        $entity = $this->runAssociateFetchQuery($request, $query, $parentEntity, $request->get('related_key'));
+        $entity = $this->runAssociateFetchQuery($request, $query, $parentEntity, $request->input('related_key'));
 
         $afterHookResult = $this->afterAssociate($request, $parentEntity, $entity);
         if ($this->hookResponds($afterHookResult)) {

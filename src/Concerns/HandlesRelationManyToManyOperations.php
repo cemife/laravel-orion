@@ -57,7 +57,7 @@ trait HandlesRelationManyToManyOperations
             $request,
             $parentEntity,
             $this->retrieve($request, 'resources'),
-            $request->get('duplicates', false)
+            $request->boolean('duplicates')
         );
 
         $afterHookResult = $this->afterAttach($request, $parentEntity, $attachResult);
@@ -404,7 +404,7 @@ trait HandlesRelationManyToManyOperations
             $request,
             $parentEntity,
             $this->retrieve($request, 'resources'),
-            $request->get('detaching', true)
+            $request->boolean('detaching', true)
         );
 
         $afterHookResult = $this->afterSync($request, $parentEntity, $syncResult);
@@ -652,7 +652,7 @@ trait HandlesRelationManyToManyOperations
 
         $this->authorize($this->resolveAbility('update'), [$entity, $parentEntity]);
 
-        $updateResult = $this->performUpdatePivot($request, $parentEntity, $relatedKey, $request->get('pivot', []));
+        $updateResult = $this->performUpdatePivot($request, $parentEntity, $relatedKey, $request->input('pivot', []));
 
         $afterHookResult = $this->afterUpdatePivot($request, $parentEntity, $updateResult);
         if ($this->hookResponds($afterHookResult)) {
