@@ -13,6 +13,7 @@ use Orion\Contracts\ParamsValidator;
 use Orion\Contracts\QueryBuilder;
 use Orion\Contracts\RelationsResolver;
 use Orion\Contracts\SearchBuilder;
+use Orion\Contracts\StoredSearchRepository;
 use Orion\Http\Controllers\Controller;
 use Orion\Http\Controllers\RelationController;
 use Orion\Http\Middleware\EnforceExpectsJson;
@@ -33,6 +34,7 @@ class OrionServiceProvider extends ServiceProvider
         $this->app->bind(ParamsValidator::class, Drivers\Standard\ParamsValidator::class);
         $this->app->bind(Paginator::class, Drivers\Standard\Paginator::class);
         $this->app->bind(SearchBuilder::class, Drivers\Standard\SearchBuilder::class);
+        $this->app->bind(StoredSearchRepository::class, Drivers\Standard\StoredSearchRepositoryManager::class);
         $this->app->bind(ComponentsResolver::class, Drivers\Standard\ComponentsResolver::class);
         $this->app->bind(KeyResolver::class, Drivers\Standard\KeyResolver::class);
 
@@ -53,6 +55,15 @@ class OrionServiceProvider extends ServiceProvider
                 __DIR__ . '/../config/orion.php' => config_path('orion.php'),
             ],
             'orion-config'
+        );
+
+        $this->publishes(
+            [
+                __DIR__ . '/../database/migrations/create_orion_search_links_table.php.stub' => database_path(
+                    'migrations/'.date('Y_m_d_His').'_create_orion_search_links_table.php'
+                ),
+            ],
+            'orion-search-links-migration'
         );
 
         $this->mergeConfigFrom(__DIR__ . '/../config/orion.php', 'orion');

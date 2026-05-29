@@ -26,7 +26,7 @@ class ResourceRegistrar extends \Illuminate\Routing\ResourceRegistrar
      *
      * @var array
      */
-    protected $resourceDefaults = ['search', 'batchStore', 'batchUpdate', 'batchDestroy', 'batchRestore', 'index', 'store', 'show', 'update', 'destroy', 'restore'];
+    protected $resourceDefaults = ['search', 'searchByStoredLink', 'storeSearchLink', 'batchStore', 'batchUpdate', 'batchDestroy', 'batchRestore', 'index', 'store', 'show', 'update', 'destroy', 'restore'];
 
     /**
      * Add the search method for a resourceful route.
@@ -42,6 +42,42 @@ class ResourceRegistrar extends \Illuminate\Routing\ResourceRegistrar
         $uri = $this->getResourceUri($name).'/search';
 
         $action = $this->getResourceAction($name, $controller, 'search', $options);
+
+        return $this->router->post($uri, $action);
+    }
+
+    /**
+     * Add the stored search link executor route for a resourceful route.
+     *
+     * @param string $name
+     * @param string $base
+     * @param string $controller
+     * @param array $options
+     * @return Route
+     */
+    protected function addResourceSearchByStoredLink(string $name, string $base, string $controller, array $options): Route
+    {
+        $uri = $this->getResourceUri($name).'/search';
+
+        $action = $this->getResourceAction($name, $controller, 'searchByStoredLink', $options);
+
+        return $this->router->get($uri, $action);
+    }
+
+    /**
+     * Add the stored search link creation route for a resourceful route.
+     *
+     * @param string $name
+     * @param string $base
+     * @param string $controller
+     * @param array $options
+     * @return Route
+     */
+    protected function addResourceStoreSearchLink(string $name, string $base, string $controller, array $options): Route
+    {
+        $uri = $this->getResourceUri($name).'/search-links';
+
+        $action = $this->getResourceAction($name, $controller, 'storeSearchLink', $options);
 
         return $this->router->post($uri, $action);
     }

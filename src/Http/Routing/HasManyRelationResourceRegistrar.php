@@ -11,7 +11,7 @@ class HasManyRelationResourceRegistrar extends RelationResourceRegistrar
      *
      * @var array
      */
-    protected $resourceDefaults = ['search', 'batchStore', 'batchUpdate', 'batchDestroy', 'batchRestore', 'associate', 'dissociate', 'index', 'store', 'show', 'update', 'destroy', 'restore'];
+    protected $resourceDefaults = ['search', 'searchByStoredLink', 'storeSearchLink', 'batchStore', 'batchUpdate', 'batchDestroy', 'batchRestore', 'associate', 'dissociate', 'index', 'store', 'show', 'update', 'destroy', 'restore'];
 
     /**
      * Add the associate method for a resourceful route.

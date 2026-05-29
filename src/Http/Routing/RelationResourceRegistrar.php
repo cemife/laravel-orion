@@ -45,6 +45,42 @@ class RelationResourceRegistrar extends ResourceRegistrar
     }
 
     /**
+     * Add the stored search link executor route for a resourceful route.
+     *
+     * @param string $name
+     * @param string $base
+     * @param string $controller
+     * @param array $options
+     * @return Route
+     */
+    protected function addResourceSearchByStoredLink(string $name, string $base, string $controller, array $options): Route
+    {
+        $uri = $this->getNestedResourceUriWithoutNestedParameter($name, $base).'/search';
+
+        $action = $this->getResourceAction($name, $controller, 'searchByStoredLink', $options);
+
+        return $this->router->get($uri, $action);
+    }
+
+    /**
+     * Add the stored search link creation route for a resourceful route.
+     *
+     * @param string $name
+     * @param string $base
+     * @param string $controller
+     * @param array $options
+     * @return Route
+     */
+    protected function addResourceStoreSearchLink(string $name, string $base, string $controller, array $options): Route
+    {
+        $uri = $this->getNestedResourceUriWithoutNestedParameter($name, $base).'/search-links';
+
+        $action = $this->getResourceAction($name, $controller, 'storeSearchLink', $options);
+
+        return $this->router->post($uri, $action);
+    }
+
+    /**
      * Add the store method for a resourceful route.
      *
      * @param  string  $name

@@ -73,7 +73,7 @@ class PendingResourceRegistration extends \Illuminate\Routing\PendingResourceReg
     {
         $except = Arr::get($this->options, 'except');
 
-        $except = array_merge($except, ['search']);
+        $except = array_merge($except, ['search', 'searchByStoredLink', 'storeSearchLink']);
 
         $this->except($except);
 

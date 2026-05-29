@@ -19,6 +19,8 @@ class OrionTest extends TestCase
         );
 
         $this->assertRouteRegistered('api.projects.search', ['POST'], 'api/projects/search', DummyController::class.'@search');
+        $this->assertRouteRegistered('api.projects.searchByStoredLink', ['GET', 'HEAD'], 'api/projects/search', DummyController::class.'@searchByStoredLink');
+        $this->assertRouteRegistered('api.projects.storeSearchLink', ['POST'], 'api/projects/search-links', DummyController::class.'@storeSearchLink');
         $this->assertRouteRegistered('api.projects.index', ['GET', 'HEAD'], 'api/projects', DummyController::class.'@index');
         $this->assertRouteRegistered('api.projects.store', ['POST'], 'api/projects', DummyController::class.'@store');
         $this->assertRouteRegistered('api.projects.show', ['GET', 'HEAD'], 'api/projects/{project}', DummyController::class.'@show');
@@ -103,6 +105,8 @@ class OrionTest extends TestCase
 
         $this->assertRouteRegistered('api.projects.projects.index', ['GET', 'HEAD'], 'api/projects/{project}/projects', DummyController::class.'@index');
         $this->assertRouteRegistered('api.projects.projects.search', ['POST'], 'api/projects/{project}/projects/search', DummyController::class.'@search');
+        $this->assertRouteRegistered('api.projects.projects.searchByStoredLink', ['GET', 'HEAD'], 'api/projects/{project}/projects/search', DummyController::class.'@searchByStoredLink');
+        $this->assertRouteRegistered('api.projects.projects.storeSearchLink', ['POST'], 'api/projects/{project}/projects/search-links', DummyController::class.'@storeSearchLink');
         $this->assertRouteRegistered('api.projects.projects.store', ['POST'], 'api/projects/{project}/projects', DummyController::class.'@store');
         $this->assertRouteRegistered('api.projects.projects.show', ['GET', 'HEAD'], 'api/projects/{project}/projects/{project?}', DummyController::class.'@show');
         $this->assertRouteRegistered('api.projects.projects.update', ['PUT', 'PATCH'], 'api/projects/{project}/projects/{project?}', DummyController::class.'@update');
@@ -701,6 +705,8 @@ class OrionTest extends TestCase
         );
 
         $this->assertRouteRegistered('api.projects.search', ['POST'], 'api/projects/search', DummyController::class.'@search');
+        $this->assertRouteRegistered('api.projects.searchByStoredLink', ['GET', 'HEAD'], 'api/projects/search', DummyController::class.'@searchByStoredLink');
+        $this->assertRouteRegistered('api.projects.storeSearchLink', ['POST'], 'api/projects/search-links', DummyController::class.'@storeSearchLink');
         $this->assertRouteRegistered('api.projects.index', ['GET', 'HEAD'], 'api/projects', DummyController::class.'@index');
         $this->assertRouteRegistered('api.projects.store', ['POST'], 'api/projects', DummyController::class.'@store');
         $this->assertRouteRegistered('api.projects.show', ['GET', 'HEAD'], 'api/projects/{project}', DummyController::class.'@show');
@@ -723,6 +729,8 @@ class OrionTest extends TestCase
         );
 
         $this->assertRouteNotRegistered('api.projects.search');
+        $this->assertRouteNotRegistered('api.projects.searchByStoredLink');
+        $this->assertRouteNotRegistered('api.projects.storeSearchLink');
 
         $this->assertRouteRegistered('api.projects.index', ['GET', 'HEAD'], 'api/projects', DummyController::class.'@index');
         $this->assertRouteRegistered('api.projects.store', ['POST'], 'api/projects', DummyController::class.'@store');

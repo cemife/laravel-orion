@@ -6,11 +6,15 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Orion\Contracts\StoredSearchRepository;
 use Orion\Http\Requests\Request;
 use Orion\Http\Resources\CollectionResource;
 use Orion\Http\Resources\Resource;
@@ -67,7 +71,7 @@ trait HandlesStandardOperations
                 return $this->beforeFilterApplied($request, $filterDescriptor);
             })->toArray();
 
-        $request->request->add(['filters' => $filters]);
+        $request->merge(['filters' => $filters]);
 
         return $this->buildFetchQuery($request, $requestedRelations);
     }
@@ -143,7 +147,157 @@ trait HandlesStandardOperations
      */
     public function search(Request $request)
     {
+        if ($request->isMethod('get') || $request->query('sid')) {
+            $this->applyStoredSearchLink($request);
+        }
+
         return $this->index($request);
+    }
+
+    /**
+     * Filters, sorts, and fetches the list of resources by a stored search link.
+     *
+     * @param Request $request
+     * @return CollectionResource
+     * @throws AuthorizationException
+     * @throws BindingResolutionException
+     */
+    public function searchByStoredLink(Request $request)
+    {
+        return $this->search($request);
+    }
+
+    /**
+     * Stores a search payload and returns a short URL that can replay it.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws AuthorizationException
+     * @throws BindingResolutionException
+     */
+    public function storeSearchLink(Request $request)
+    {
+        $this->authorize($this->resolveAbility('index'), $this->resolveResourceModelClass());
+
+        $this->validateSearchLinkPayload($request);
+
+        $id = $this->storedSearchRepository()->store([
+            'context' => $this->storedSearchContext($request),
+            'payload' => $this->storedSearchPayload($request),
+            'query' => $this->storedSearchQuery($request),
+        ]);
+
+        return response()->json([
+            'id' => $id,
+            'url' => $this->storedSearchUrl($request, $id),
+        ], 201);
+    }
+
+    protected function applyStoredSearchLink(Request $request): void
+    {
+        Validator::make($request->query(), [
+            'sid' => ['required', 'string'],
+        ])->validate();
+
+        $storedSearch = $this->storedSearchRepository()->find($request->query('sid'));
+
+        if (
+            !$storedSearch ||
+            !isset($storedSearch['payload']) ||
+            !is_array($storedSearch['payload']) ||
+            Arr::get($storedSearch, 'context') !== $this->storedSearchContext($request)
+        ) {
+            abort(404, 'Search link not found.');
+        }
+
+        $request->query->replace(array_merge($request->query(), Arr::get($storedSearch, 'query', [])));
+        $request->merge($storedSearch['payload']);
+    }
+
+    protected function validateSearchLinkPayload(Request $request): void
+    {
+        $this->paramsValidator->validateScopes($request);
+        $this->paramsValidator->validateFilters($request);
+        $this->paramsValidator->validateSearch($request);
+        $this->paramsValidator->validateAggregators($request);
+        $this->paramsValidator->validateIncludes($request);
+        $this->paramsValidator->validateSort($request);
+    }
+
+    protected function storedSearchPayload(Request $request): array
+    {
+        return Arr::only(
+            $request->all(),
+            config('orion.search_links.payload_keys', [
+                'aggregates',
+                'filters',
+                'includes',
+                'limit',
+                'scopes',
+                'search',
+                'sort',
+            ])
+        );
+    }
+
+    protected function storedSearchQuery(Request $request): array
+    {
+        return Arr::only(
+            $request->query(),
+            config('orion.search_links.query_keys', [
+                'include',
+                'only_trashed',
+                'with_avg',
+                'with_count',
+                'with_exists',
+                'with_max',
+                'with_min',
+                'with_sum',
+                'with_trashed',
+            ])
+        );
+    }
+
+    protected function storedSearchContext(Request $request): array
+    {
+        $uri = $request->route() ? '/'.trim($request->route()->uri(), '/') : '/'.trim($request->path(), '/');
+        $resourceUri = Str::replaceLast('/search-links', '', $uri);
+        $resourceUri = Str::replaceLast('/search', '', $resourceUri);
+
+        return [
+            'controller' => static::class,
+            'resource_uri' => $resourceUri,
+            'route_parameters' => $this->normalizedRouteParameters($request),
+        ];
+    }
+
+    protected function normalizedRouteParameters(Request $request): array
+    {
+        if (!$request->route()) {
+            return [];
+        }
+
+        return collect($request->route()->parameters())
+            ->map(function ($value) {
+                if ($value instanceof UrlRoutable) {
+                    return (string) $value->getRouteKey();
+                }
+
+                return is_scalar($value) || $value === null ? (string) $value : serialize($value);
+            })
+            ->all();
+    }
+
+    protected function storedSearchUrl(Request $request, string $id): string
+    {
+        $path = Str::replaceLast('/search-links', '/search', '/'.trim($request->path(), '/'));
+
+        return $path.'?'.http_build_query(['sid' => $id], '', '&', PHP_QUERY_RFC3986);
+    }
+
+    protected function storedSearchRepository(): StoredSearchRepository
+    {
+        return app(StoredSearchRepository::class);
     }
 
     /**

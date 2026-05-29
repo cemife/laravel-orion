@@ -75,8 +75,8 @@ class QueryBuilder implements \Orion\Contracts\QueryBuilder
             $this->applyIncludesToQuery($query, $request);
             $this->applyAggregatesToQuery($query, $request);
 
-            if (in_array($actionMethod, ['index', 'search', 'show'])) {
-                if ($actionMethod === 'search') {
+            if (in_array($actionMethod, ['index', 'search', 'searchByStoredLink', 'show'])) {
+                if (in_array($actionMethod, ['search', 'searchByStoredLink'])) {
                     $this->applyScopesToQuery($query, $request);
                     $this->applyFiltersToQuery($query, $request);
                     $this->applySearchingToQuery($query, $request);

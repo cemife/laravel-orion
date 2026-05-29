@@ -50,6 +50,44 @@ return [
         'max_nested_depth' => 1,
     ],
 
+    'search_links' => [
+        'driver' => env('ORION_SEARCH_LINKS_DRIVER', 'filesystem'),
+        'id_prefix' => 'srch_',
+        'id_length' => 12,
+        'ttl' => env('ORION_SEARCH_LINKS_TTL', 86400),
+        'filesystem' => [
+            'path' => storage_path('framework/orion/search-links'),
+        ],
+        'database' => [
+            'connection' => null,
+            'table' => 'orion_search_links',
+        ],
+        'redis' => [
+            'cache_store' => 'redis',
+            'key_prefix' => 'orion:search-links:',
+        ],
+        'payload_keys' => [
+            'aggregates',
+            'filters',
+            'includes',
+            'limit',
+            'scopes',
+            'search',
+            'sort',
+        ],
+        'query_keys' => [
+            'include',
+            'only_trashed',
+            'with_avg',
+            'with_count',
+            'with_exists',
+            'with_max',
+            'with_min',
+            'with_sum',
+            'with_trashed',
+        ],
+    ],
+
     'use_validated' => false,
 
     'route_discovery' => [
